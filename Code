@@ -1,0 +1,105 @@
+#problem 2
+import pandas as pd
+from scipy.stats import pearsonr
+from sklearn.datasets import load_boston
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+'''
+1).The names of the features are the columns of the dataset 
+for boston it's ['CRIM' 'ZN' 'INDUS' 'CHAS' 'NOX' 'RM' 'AGE' 'DIS' 'RAD' 'TAX' 'PTRATIO' 'B' 'LSTAT']
+for movies it's ['Title', 'Year', 'Age', 'Rotten Tomatoes', 'Netflix', 'Hulu','Prime Video', 'Disney+']
+
+2).The features are most correlated to themselves which is 1, the values bigger than 0 are positive correlations
+such as NOX(nitric oxide concentration) to TAX(full value property)(0.67), 
+and the better the correlation the closer the vlaue is to 1, 
+for example TAX and RAD(index of accessibility to radial highways)(0.91)
+For negative values, they have negative correlation, one variable increases, the other decrease, for example
+AGE and DIS are negative correlated(-0.75)
+Same logic applies to Movies, Rotten Tomatoes and Prime Videos are negative correlated(-0.26), but Hulu and Rotten
+Tomatoes are most positively correlated(0.16)
+
+3).In boston: RM(average room #s) is highly correlated to Price
+In movies: Randomly generated target(Rating) values are highly correlated to Rotten Tomato ratings
+
+4).
+if two features A and B are highly correlated to each other, 
+it does not necessarily mean that they are also highly correlated to the target (response) variable.
+For example, NOX and AGE are highly correlated, but AGE and NOX are both negative correlated to 
+the target Price.
+
+
+Problem3
+There is an ethical issue. The pricing and the quality of the neighborhoods took many aspects such as
+pupil teacher ration in town, nitric oxides concentration, it classified and listed out the population of
+Black people, crime rate, and low status population, where they're highly correlated but in reality, the 
+real reasons behind this such as Redlining, systemic racism are ignored by this dataset. Any predictions
+made using this dataset will be biased against black population. We can better it by including features such as
+government funding, diversity etc. 
+
+
+'''
+
+
+
+
+
+
+boston = load_boston()
+print(boston.feature_names) #names of the features
+bos = pd.DataFrame(boston.data, columns = boston.feature_names)
+
+bos['Price'] = boston.target
+X = bos.drop("Price", 1)       # feature matrix
+y = bos['Price']               # target feature
+
+plt.subplots(figsize=(20,15))
+sns.heatmap(
+    bos.corr(), 
+    vmin=-1, vmax=1, center=0,
+    cmap=sns.diverging_palette(20, 220, n=200),
+    annot=True, annot_kws={'size': 15},
+    square=True)
+
+plt.show() 
+
+
+#Part 2 Movies
+
+df = pd.read_csv("MoviesOnStreamingPlatforms.csv")
+
+df.drop(["Unnamed: 0","ID", "Type"], axis=1, inplace=True)
+#all of the data are on movies so we drop Type
+#Unnamed:0 and ID are redundant as well.
+
+correlation = df.corr()
+print(correlation)
+print(df.columns)
+
+df = df.dropna() # drop all rows that contain missing values
+
+df['Rotten Tomatoes'] = df['Rotten Tomatoes'].apply(lambda x: int(x.split("/")[0]) / int(x.split("/")[1]))
+#convert Rotten Tomatoes score into numerical values
+#split it using the token"/" and 
+
+
+target_values = np.random.normal(10, 9, size=len(df))
+
+# Assign the generated values to the target column
+df['Rating'] = target_values
+X = df.drop("Rating", 1)       # feature matrix
+y = df['Rating']              # target feature
+
+
+print(df.columns[3])
+
+plt.subplots(figsize=(20,15))
+sns.heatmap(
+    df.corr(), 
+    vmin=-1, vmax=1, center=0,
+    cmap='rocket',
+    annot=True, annot_kws={'size': 15},
+    square=True)
+
+plt.show()
